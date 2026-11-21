@@ -1,0 +1,146 @@
+---
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+---
+
+<article class="card">
+  <a class="thumb" href={project.href} target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+    <img
+      src={project.image.src}
+      alt={project.image.alt}
+      class:list={{ pixel: project.image.pixel }}
+      loading="lazy"
+      decoding="async"
+    />
+  </a>
+  <div class="body">
+    <h3>
+      <a href={project.href} target="_blank" rel="noopener">{project.title}</a>
+      {project.subtitle && <span class="subtitle">{project.subtitle}</span>}
+    </h3>
+    <p class="desc">{project.desc}</p>
+    <ul class="tags">
+      {project.tags.map((tag) => <li>{tag}</li>)}
+    </ul>
+    <div class="footer">
+      <a class="more" href={project.href} target="_blank" rel="noopener">{project.linkLabel} ↗</a>
+      {project.note && <p class="note">{project.note}</p>}
+    </div>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .thumb {
+    display: grid;
+    place-items: center;
+    height: 168px;
+    background-color: var(--surface-2);
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  .thumb img {
+    height: 124px;
+    width: auto;
+    max-width: 85%;
+    object-fit: contain;
+  }
+
+  .thumb img.pixel {
+    image-rendering: pixelated;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 18px 20px 20px;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    margin: 0 0 8px;
+    line-height: 1.4;
+  }
+
+  h3 a {
+    color: var(--text);
+  }
+
+  .subtitle {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .desc {
+    font-size: 0.93rem;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+  }
+
+  .tags li {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .footer {
+    margin-top: auto;
+  }
+
+  .more {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+  }
+
+  .note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 8px 0 0;
+    line-height: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
+    }
+    .card:hover {
+      transform: none;
+    }
+  }
+</style>

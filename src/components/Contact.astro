@@ -1,0 +1,49 @@
+---
+import { site } from '../data/site';
+const year = new Date().getFullYear();
+---
+
+<section id="contact">
+  <div class="container">
+    <h2 class="section-title">联系</h2>
+    <p class="lead">有合作、实习或交流的想法，欢迎发邮件给我。</p>
+    <a class="email" href={`mailto:${site.email}`}>{site.email}</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>© {year} {site.name}</span>
+    <a href={site.github} target="_blank" rel="noopener">GitHub</a>
+  </div>
+</footer>
+
+<style>
+  .lead {
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+
+  .email {
+    font-family: var(--font-mono);
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    overflow-wrap: anywhere;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0 32px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  footer .container {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  footer a {
+    color: var(--muted);
+  }
+</style>
