@@ -1,6 +1,6 @@
 # jjkun.top
 
-JJkun 的个人主页，用 [Astro](https://astro.build) 构建，部署在 GitHub Pages。
+JJkun 的个人主页，用 [Astro](https://astro.build) 构建，部署在 Cloudflare Workers。
 
 ## 本地开发
 
@@ -23,17 +23,8 @@ npm run build    # 输出到 dist/
 
 ## 部署
 
-推送到 `main` 分支后，`.github/workflows/deploy.yml` 会自动构建并发布。
+网站跑在 Cloudflare Workers 上（Worker 名为 `personal-web`），已经和 GitHub 仓库 `JJkun28/personal-web` 关联。
 
-第一次部署需要先配置：
-
-1. 在 GitHub 上新建仓库 `JJkun28.github.io`，把代码推上去。
-2. 仓库 Settings → Pages → Build and deployment → Source 选 **GitHub Actions**。
-3. 同一页的 Custom domain 填 `jjkun.top`（`public/CNAME` 里也已经写好）。
-4. Cloudflare DNS（都设为 **仅 DNS / 灰云**）：
-   - `A  @  185.199.108.153`
-   - `A  @  185.199.109.153`
-   - `A  @  185.199.110.153`
-   - `A  @  185.199.111.153`
-   - `CNAME  www  JJkun28.github.io`
-5. DNS 生效、证书签发后，在 Pages 设置里勾选 **Enforce HTTPS**。
+- 推送到 `main` 分支后，Cloudflare 会自动执行 `npm run build`，然后运行 `npx wrangler deploy` 发布。
+- `jjkun.top` 和 `www.jjkun.top` 都绑定在这个 Worker 上，www 会跳转到主域名，http 会跳转到 https。
+- 构建和部署记录在 Cloudflare 后台：Workers 和 Pages → personal-web → 部署。
