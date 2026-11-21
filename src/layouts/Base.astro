@@ -7,8 +7,8 @@ interface Props {
 }
 
 const {
-  title = `${site.name} · ${site.tagline}`,
-  description = `${site.name}（${site.school}）的个人主页：AI 应用作品与项目。`,
+  title = `${site.name} ${site.alias} · 个人主页`,
+  description = `${site.name}（${site.alias}），${site.tagline}。实习经历、项目与技能。`,
 } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---

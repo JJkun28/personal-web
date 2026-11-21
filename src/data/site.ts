@@ -1,7 +1,7 @@
 export const site = {
-  name: 'JJkun',
-  school: 'UC Davis',
-  tagline: '做 AI 应用，正在往量化与交易方向发展',
+  name: '姜哲',
+  alias: 'JJkun',
+  tagline: '哥伦比亚大学应用统计学生 · 2027 届',
   email: 'zhejiang0518@gmail.com',
   github: 'https://github.com/JJkun28',
 };
