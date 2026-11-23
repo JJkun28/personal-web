@@ -1,9 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="96 109 312 300">
+  <!-- 网站图标：和左上角一样的 JZ 字标。浅色浏览器里是黑色，深色浏览器里是白色 -->
   <style>
-    rect { fill: #2f6fde; }
-    text { fill: #ffffff; }
-    @media (prefers-color-scheme: dark) { rect { fill: #7aa7ff; } text { fill: #111113; } }
+    .ink { color: #111111; }
+    @media (prefers-color-scheme: dark) { .ink { color: #ffffff; } }
   </style>
-  <rect width="32" height="32" rx="7"/>
-  <text x="16" y="22" font-family="ui-monospace, Consolas, monospace" font-size="15" font-weight="700" text-anchor="middle">JJ</text>
+  <g class="ink">
+    <g fill="currentColor">
+      <path d="M158 154H395L297.75 283H249.75L339.25 164H158Z"/>
+      <path d="M283.75 283H297.75L258 336H402L381 364H205C221 364 232 351 241 339Z"/>
+      <rect x="158" y="176" width="81.5" height="10"/>
+      <path d="M230.5 181H239.5V284L230.5 296Z"/>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="11">
+      <path d="M255 159V283L215 337C204 351 189 357 168 357C130 357 105.5 334 105.5 304V276"/>
+      <path d="M207.5 181V296C207.5 318 191 330.5 170 330.5C146 330.5 129.5 315 129.5 298V276"/>
+    </g>
+  </g>
 </svg>

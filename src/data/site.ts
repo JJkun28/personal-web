@@ -1,5 +1,7 @@
 export const site = {
   name: '姜哲',
+  // 浏览器标签页上的网页标题
+  title: 'JZ-姜哲个人主页',
   pinyin: 'Jiang Zhe',
   // 左上角的缩写 logo
   initials: 'JZ',

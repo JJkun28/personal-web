@@ -18,7 +18,7 @@ const root = rootOf(Astro.url);
 const { cover } = project;
 ---
 
-<Page title={`${project.title} · ${site.name} ${site.alias}`} description={project.summary}>
+<Page title={`${project.title} · ${site.title}`} description={project.summary}>
   <main class="container detail">
     {/* 打开详情页第一眼看到的永远是封面；桌宠合集没有封面图，用三只桌宠代替 */}
     {
@@ -51,7 +51,8 @@ const { cover } = project;
       )
     }
 
-    <a class="back" href={`${root}index.html#projects`}>← 返回项目</a>
+    {/* 滑到它碰到顶部栏时，顶部栏切换成同样的「返回项目」（见 TopBar.astro） */}
+    <a class="back" href={`${root}index.html#projects`} data-back data-back-anchor>← 返回项目</a>
 
     <header>
       <h1>{project.title}</h1>

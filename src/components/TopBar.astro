@@ -2,21 +2,79 @@
 import { site } from '../data/site';
 import { rootOf } from '../lib/paths';
 
-// 首页：点 JZ 回到顶部，点「联系方式」跳到页面底部的联系模块；
-// 项目详情页：两者都回首页（联系方式跳到首页的联系模块）
+// 顶部栏：左边 JZ，右边「联系方式」。
+// 首页：JZ 回到顶部，联系方式跳到页面底部的联系模块。
+// 项目详情页：一开始和首页一样（链接指回首页）；往下滑到正文里的「← 返回项目」碰到顶部栏时，
+// 顶部栏平滑切换成常驻的「← 返回项目」，滑回去又换回来。
 const root = rootOf(Astro.url);
-const home = root ? `${root}index.html` : '#top';
-const contact = root ? `${root}index.html#contact` : '#contact';
+const isHome = !root;
+const home = isHome ? '#top' : `${root}index.html`;
+const contact = isHome ? '#contact' : `${root}index.html#contact`;
 ---
 
 <div class="topbar">
   <div class="container bar">
-    <a class="brand" href={home} aria-label={`${site.name}，${root ? '回到首页' : '回到顶部'}`}>
-      {site.initials}
+    <a class="brand" href={home} aria-label={`${site.name}，${isHome ? '回到顶部' : '回到首页'}`}>
+      {/* JZ 字标：J 由三条平行细线组成，最右一条汇进 Z 的斜笔。颜色跟随文字色（深色模式自动变白） */}
+      <svg class="logo" viewBox="96 150 312 218" aria-hidden="true">
+        <g fill="currentColor">
+          <path d="M158 154H395L297.75 283H249.75L339.25 164H158Z" />
+          <path d="M283.75 283H297.75L258 336H402L381 364H205C221 364 232 351 241 339Z" />
+          <rect x="158" y="176" width="81.5" height="10" />
+          <path d="M230.5 181H239.5V284L230.5 296Z" />
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="11">
+          <path d="M255 159V283L215 337C204 351 189 357 168 357C130 357 105.5 334 105.5 304V276" />
+          <path d="M207.5 181V296C207.5 318 191 330.5 170 330.5C146 330.5 129.5 315 129.5 298V276" />
+        </g>
+      </svg>
     </a>
-    <a class="contact-link" href={contact}>联系方式</a>
+    <a class="pill" href={contact}>联系方式</a>
+    {
+      !isHome && (
+        <a class="pill docked-back" href={`${root}index.html#projects`} data-back>
+          <span aria-hidden="true">←</span> 返回项目
+        </a>
+      )
+    }
   </div>
 </div>
+
+<script>
+  // 从首页点进来的：用浏览器的「后退」，回到点击前的滚动位置；直接打开详情页的：跳到首页项目区
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-back]')) {
+    link.addEventListener('click', (e) => {
+      const ref = document.referrer ? new URL(document.referrer) : null;
+      const fromHome =
+        ref && ref.origin === location.origin && /\/(index\.html)?$/.test(ref.pathname);
+      if (fromHome && history.length > 1) {
+        e.preventDefault();
+        history.back();
+      }
+    });
+  }
+
+  // 正文里的「返回项目」滑到顶部栏下面时，顶部栏切换成返回按钮
+  const bar = document.querySelector<HTMLElement>('.topbar');
+  const anchor = document.querySelector<HTMLElement>('[data-back-anchor]');
+  if (bar && anchor) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const docked = anchor.getBoundingClientRect().top < bar.offsetHeight;
+      bar.classList.toggle('docked', docked);
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+  }
+</script>
 
 <style>
   .topbar {
@@ -31,21 +89,28 @@ const contact = root ? `${root}index.html#contact` : '#contact';
 
   /* 顶部栏不受正文 960px 宽度限制：JZ 贴最左、联系方式贴最右（留和正文一样的边距） */
   .bar {
+    position: relative;
     max-width: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
     min-height: 64px;
+    overflow: hidden;
   }
 
-  /* 缩写 logo：粗体、字距收紧，像一个字标 */
+  /* JZ 字标 */
   .brand {
-    font-size: 1.6rem;
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.06em;
+    display: block;
+    line-height: 0;
     color: var(--text);
+  }
+
+  .logo {
+    display: block;
+    height: 32px;
+    width: auto;
+    aspect-ratio: 312 / 218;
   }
 
   .brand:hover {
@@ -53,7 +118,7 @@ const contact = root ? `${root}index.html#contact` : '#contact';
     color: var(--accent);
   }
 
-  .contact-link {
+  .pill {
     padding: 7px 14px;
     border: 1px solid var(--border);
     border-radius: 999px;
@@ -61,16 +126,70 @@ const contact = root ? `${root}index.html#contact` : '#contact';
     color: var(--text);
     font-size: 0.9rem;
     line-height: 1.4;
+  }
+
+  .pill:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  /* 切换动画：JZ 和联系方式往上淡出，返回按钮从下面淡入（隐藏时也不能被 Tab 选中） */
+  .brand,
+  .pill {
     transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0s linear 0s,
       background-color 0.15s,
       border-color 0.15s,
       color 0.15s;
   }
 
-  .contact-link:hover {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-    color: var(--accent);
-    text-decoration: none;
+  .docked-back {
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(-50% + 12px));
+    transition-delay: 0s, 0s, 0.25s, 0s, 0s, 0s;
+  }
+
+  .docked-back span {
+    margin-right: 2px;
+  }
+
+  .docked .brand,
+  .docked .pill:not(.docked-back) {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    transition-delay: 0s, 0s, 0.25s, 0s, 0s, 0s;
+  }
+
+  .docked .docked-back {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%);
+    transition-delay: 0s;
+  }
+
+  @media (max-width: 639px) {
+    .docked-back {
+      left: 16px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand,
+    .pill,
+    .docked-back {
+      transform: none !important;
+    }
+    .docked-back {
+      transform: translateY(-50%) !important;
+    }
   }
 </style>

@@ -12,6 +12,7 @@ export interface Skill {
   projects?: string[];
 }
 
+// 顺序就是首页显示的顺序：最想让人先看到的放前面
 export const skills: Skill[] = [
   {
     icon: 'code',
@@ -20,13 +21,6 @@ export const skills: Skill[] = [
     desc: '用 Pandas / NumPy 清洗和分析数据；用 openpyxl 直接生成带公式、图表、可逐格核对的 Excel 报表。',
     items: ['Pandas', 'NumPy', 'openpyxl'],
     projects: ['fund-performance-eval'],
-  },
-  {
-    icon: 'database',
-    name: 'SQL 查询',
-    en: 'SQL',
-    desc: '熟练使用窗口函数和 CTE 写多层统计查询，在 Hive 上做业务数据的汇总与分析。',
-    items: ['窗口函数', 'CTE', 'Hive'],
   },
   {
     icon: 'chart',
@@ -50,6 +44,13 @@ export const skills: Skill[] = [
     desc: '开发 Agent Skills、MCP 和 Claude Code hooks，把业务流程交给 agent；搭建 RAG（Qdrant 向量检索、Neo4j 图谱）。',
     items: ['Agent Skills', 'MCP', 'RAG', 'Claude Code'],
     projects: ['fund-performance-eval', 'claude-pet'],
+  },
+  {
+    icon: 'database',
+    name: 'SQL 查询',
+    en: 'SQL',
+    desc: '熟练使用窗口函数和 CTE 写多层统计查询，在 Hive 上做业务数据的汇总与分析。',
+    items: ['窗口函数', 'CTE', 'Hive'],
   },
   {
     icon: 'tool',
