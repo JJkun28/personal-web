@@ -6,7 +6,7 @@ export interface SkillGroup {
 export const skills: SkillGroup[] = [
   {
     name: '编程与数据',
-    items: ['Python（Pandas、NumPy）', 'SQL（窗口函数、CTE、Hive）', 'R（dplyr、ggplot2）'],
+    items: ['Python（Pandas、NumPy）', 'openpyxl（Excel 公式与图表自动化）','SQL（窗口函数、CTE、Hive）', 'R（dplyr、ggplot2）'],
   },
   {
     name: '量化与统计',

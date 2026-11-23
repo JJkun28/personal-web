@@ -15,11 +15,12 @@ npm run build    # 输出到 dist/
 | 想改什么 | 改哪个文件 |
 |---|---|
 | 名字、一句话介绍、邮箱 | `src/data/site.ts` |
-| 项目卡片 | `src/data/projects.ts`（加一条就多一张卡片） |
+| 项目（首页拼图 + 详情页） | `src/data/projects.ts`（加一条就多一块拼图和一个详情页） |
 | 技能 | `src/data/skills.ts` |
 | 颜色、字体 | `src/layouts/Base.astro` 里的 `:root` 变量 |
+| 右侧插画 | `src/layouts/Page.astro`（图片在 `public/images/shanghai-newyork-*.webp`） |
 
-缩略图放在 `public/images/`。像素图在 `image` 里加上 `pixel: true`，放大时就不会变模糊。
+图片放在 `public/images/`。像素图在 `cover` 里加上 `pixel: true`，放大时就不会变模糊。
 
 ## 部署
 

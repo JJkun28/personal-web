@@ -1,29 +1,101 @@
 ---
 import { projects } from '../data/projects';
-import ProjectCard from './ProjectCard.astro';
-import PetStack from './PetStack.astro';
+import ProjectTile from './ProjectTile.astro';
+
+const [first, second, ...rest] = projects;
 ---
 
 <section id="projects">
   <div class="container">
     <h2 class="section-title">项目</h2>
-    <div class="grid">
-      {projects.map((project) => <ProjectCard project={project} />)}
-      <PetStack />
+    <div class="bento">
+      {first && <ProjectTile project={first} />}
+      {second && <ProjectTile project={second} />}
+      <div class="row">
+        {rest.map((project) => <ProjectTile project={project} />)}
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .grid {
+  /*
+    四块拼成一整块，大小各不相同（按 projects 数组顺序）：
+      宽屏         a a a b b
+                   a a a b b
+                   [ 3 ][ 4 ]   ← 最下面一行：鼠标移到第 4 块上，它展开、把第 3 块挤小
+    窄屏时竖着排，每块高度也不一样。
+  */
+  .bento {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 260px 200px auto;
   }
 
-  @media (min-width: 600px) {
-    .grid {
-      grid-template-columns: repeat(2, 1fr);
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .row > :global(:nth-child(1)) {
+    height: 150px;
+  }
+  .row > :global(:nth-child(2)) {
+    height: 170px;
+  }
+
+  @media (min-width: 640px) {
+    .bento {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-rows: 150px 150px 170px;
+      grid-template-areas:
+        'a a a b b'
+        'a a a b b'
+        'r r r r r';
+    }
+
+    .bento > :global(:nth-child(1)) {
+      grid-area: a;
+    }
+    .bento > :global(:nth-child(2)) {
+      grid-area: b;
+    }
+
+    .row {
+      grid-area: r;
+      flex-direction: row;
+    }
+
+    .row > :global(*) {
+      height: auto;
+      flex: 3.4 1 0;
+    }
+    .row > :global(:nth-child(2)) {
+      height: auto;
+      flex-grow: 1.6;
+    }
+
+    /* 鼠标移到第 4 块上：它展开，第 3 块缩成小卡片 */
+    .row:has(> :global(:nth-child(2):hover)) > :global(:nth-child(1)) {
+      flex-grow: 1.4;
+    }
+    .row > :global(:nth-child(2):hover) {
+      flex-grow: 3.6;
+    }
+
+    /* 第 3 块被挤小时，封面换成它的 squeezeCover 动画 */
+    .row:has(> :global(:nth-child(2):hover)) > :global(:nth-child(1) .cover) {
+      opacity: 0;
+    }
+    .row:has(> :global(:nth-child(2):hover)) > :global(:nth-child(1) .squeeze) {
+      opacity: 1;
+    }
+
+    /* 最大那块标题也大一点 */
+    .bento > :global(:nth-child(1) .title) {
+      font-size: 1.35rem;
     }
   }
 </style>

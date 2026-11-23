@@ -1,0 +1,100 @@
+---
+// 页面骨架：左边是可滚动的内容（顶部栏 + 正文），右边是固定不动的上海 × 纽约插画。
+// 插画会自己慢速循环播放（见 src/scripts/slowPlay.js，speed 调快慢）。
+// 窗口窄于 960px（手机、竖屏平板）时不显示插画；详情页传 art={false} 也不显示。
+import Base from './Base.astro';
+import TopBar from '../components/TopBar.astro';
+import { rootOf } from '../lib/paths';
+
+interface Props {
+  title?: string;
+  description?: string;
+  art?: boolean;
+}
+
+const { art = true, ...rest } = Astro.props;
+const root = rootOf(Astro.url);
+---
+
+<Base {...rest}>
+  <div class:list={['shell', { 'with-art': art }]}>
+    <div class="content">
+      <TopBar />
+      <slot />
+    </div>
+    {
+      art && (
+        <aside class="art">
+          <div class="frame" data-slow-play={`${root}images/shanghai-newyork-animated.webp`}>
+            <img
+              class="art-img"
+              src={`${root}images/shanghai-newyork-still.webp`}
+              alt="上海与纽约天际线拼在一起的插画"
+              width="768"
+              height="960"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </aside>
+      )
+    }
+  </div>
+</Base>
+
+<script>
+  import { slowPlay } from '../scripts/slowPlay.js';
+
+  const frame = document.querySelector<HTMLElement>('[data-slow-play]');
+  // 插画只在宽屏显示，窄屏不用下载动图。speed 0.5 = 原速的一半
+  if (frame && window.matchMedia('(min-width: 960px)').matches) {
+    slowPlay(frame, { src: frame.dataset.slowPlay!, speed: 0.5 });
+  }
+</script>
+
+<style>
+  .shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .art {
+    display: none;
+  }
+
+  @media (min-width: 960px) {
+    .shell.with-art {
+      /* 插画栏宽度按图片比例（768 × 960）跟着窗口高度走，最多占 42% 宽 */
+      --art-w: min(42vw, calc((100dvh - 32px) * 0.8 + 16px));
+      grid-template-columns: minmax(0, 1fr) var(--art-w);
+    }
+
+    .art {
+      display: block;
+      position: sticky;
+      top: 0;
+      align-self: start;
+      height: 100dvh;
+      padding: 16px 16px 16px 0;
+    }
+
+    .frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+
+    /* 原图四周有一圈白边和圆角，稍微放大裁掉 */
+    .frame :global(.art-img) {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.06);
+    }
+  }
+</style>

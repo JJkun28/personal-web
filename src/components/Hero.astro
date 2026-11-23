@@ -2,19 +2,12 @@
 import { site } from '../data/site';
 ---
 
-<header class="hero">
+<header class="hero" id="top">
   <div class="container">
-    <h1>
-      {site.name}
-      <span class="alias">{site.alias}</span>
-    </h1>
-    <p class="tagline">{site.tagline}</p>
+    <h1 class="visually-hidden">{site.name} {site.alias}</h1>
     <nav class="links" aria-label="快速链接">
-      <a href="#experience">经历</a>
       <a href="#projects">项目</a>
       <a href="#skills">技能</a>
-      <a href="#education">教育</a>
-      <a href="#contact">联系</a>
       <a href={site.github} target="_blank" rel="noopener">GitHub ↗</a>
     </nav>
   </div>
@@ -22,47 +15,46 @@ import { site } from '../data/site';
 
 <style>
   .hero {
-    padding: 96px 0 56px;
+    padding: 32px 0 28px;
     border-bottom: 1px solid var(--border);
   }
 
-  h1 {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 16px;
-    font-size: clamp(2.6rem, 8vw, 4rem);
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-    margin: 0 0 16px;
-  }
-
-  .alias {
-    font-family: var(--font-mono);
-    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
-    font-weight: 500;
-    letter-spacing: 0;
-    color: var(--accent);
-  }
-
-  .tagline {
-    font-size: clamp(1.1rem, 3.2vw, 1.35rem);
-    color: var(--muted);
-    margin: 0 0 32px;
-    max-width: 32em;
+  /* 标题只给读屏软件和搜索引擎看，名字已经显示在顶部栏 */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   .links {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 20px;
+    gap: 8px;
+    margin-left: -10px;
     font-family: var(--font-mono);
     font-size: 0.95rem;
   }
 
+  .links a {
+    padding: 4px 10px;
+    border-radius: 999px;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+
+  .links a:hover {
+    background: var(--accent-soft);
+    text-decoration: none;
+  }
+
   @media (max-width: 639px) {
     .hero {
-      padding: 64px 0 40px;
+      padding: 24px 0 20px;
     }
   }
 </style>

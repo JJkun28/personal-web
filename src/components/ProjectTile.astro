@@ -1,0 +1,204 @@
+---
+// 首页拼图里的一块：整块是封面图，左下角写标题，点击进入详情页。
+// 桌宠合集没有封面图：三只桌宠先叠成一小摞，鼠标移上去时摊开。
+// 有 squeezeCover 的块在被旁边挤小时，封面换成这段精灵动画（切换由 Projects.astro 控制）。
+import type { Project } from '../data/projects';
+import SpriteAnim from './SpriteAnim.astro';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const { cover, pets, squeezeCover } = project;
+const bg = cover?.bg ?? 'var(--surface-2)';
+const mid = pets ? (pets.length - 1) / 2 : 0;
+---
+
+<a class:list={['tile', { 'has-pets': pets }]} href={`projects/${project.slug}.html`} style={`--tile-bg: ${bg}`}>
+  {
+    pets ? (
+      <div class="pets" aria-hidden="true">
+        {pets.map((pet, i) => (
+          <span class="pet" style={`--o: ${i - mid}; --z: ${10 - Math.abs(i - mid)}`}>
+            <img src={pet.image} alt="" loading="lazy" decoding="async" />
+          </span>
+        ))}
+      </div>
+    ) : (
+      cover && (
+        <img
+          class:list={['cover', { contain: cover.fit === 'contain', pixel: cover.pixel }]}
+          src={cover.src}
+          alt={cover.alt}
+          style={cover.position ? `object-position: ${cover.position}` : undefined}
+          loading="lazy"
+          decoding="async"
+        />
+      )
+    )
+  }
+  {
+    squeezeCover && (
+      <span class="squeeze">
+        <SpriteAnim sprite={squeezeCover} name={`squeeze-${project.slug}`} alt={squeezeCover.alt} />
+      </span>
+    )
+  }
+  <span class="label">
+    <span class="title">{project.title}</span>
+    {project.subtitle && <span class="subtitle">{project.subtitle}</span>}
+  </span>
+</a>
+
+<style>
+  .tile {
+    position: relative;
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--tile-bg);
+    color: #fff;
+    text-decoration: none;
+    transition:
+      transform 0.2s ease,
+      flex-grow 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* 悬停时轻轻缩小，移开后弹回原大小 */
+  .tile:hover {
+    transform: scale(0.98);
+    text-decoration: none;
+  }
+
+  .tile:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cover.contain {
+    inset: 6% 4% 30%;
+    width: 92%;
+    height: 64%;
+    object-fit: contain;
+  }
+
+  .pixel,
+  .pets img {
+    image-rendering: pixelated;
+  }
+
+  /* 被挤小时显示的动画：平时透明，由 Projects.astro 切换 */
+  .cover,
+  .squeeze {
+    transition: opacity 0.3s ease;
+  }
+
+  .squeeze {
+    --sprite-h: 96px;
+    position: absolute;
+    inset: 0 0 30%;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+  }
+
+  /* 桌宠合集：收起时叠成一摞、略微错开倾斜；悬停时摊开 */
+  .pets {
+    position: absolute;
+    inset: 0 0 30%;
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+    background-size: 14px 14px;
+  }
+
+  .pet {
+    position: absolute;
+    top: 50%;
+    left: calc(50% + var(--o) * 26px);
+    z-index: var(--z);
+    transform: translate(-50%, -50%) rotate(calc(var(--o) * 9deg)) scale(0.92);
+    transition:
+      left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .tile:hover .pet,
+  .tile:focus-visible .pet {
+    left: calc(50% + var(--o) * 30%);
+    transform: translate(-50%, -50%);
+  }
+
+  .pets img {
+    display: block;
+    height: 84px;
+    width: auto;
+    filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.18));
+  }
+
+  /* 没有鼠标的设备直接显示摊开的样子 */
+  @media (hover: none) {
+    .pet {
+      left: calc(50% + var(--o) * 30%);
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  /* 底部渐变压暗，保证白字在任何图上都看得清 */
+  .tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.72) 0%, rgb(0 0 0 / 0.35) 32%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 11;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 16px;
+  }
+
+  .title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tile,
+    .pet {
+      transition: none;
+    }
+    .tile:hover {
+      transform: none;
+    }
+  }
+</style>

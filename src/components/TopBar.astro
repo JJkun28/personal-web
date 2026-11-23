@@ -1,0 +1,230 @@
+---
+import { site } from '../data/site';
+import { rootOf } from '../lib/paths';
+
+// 首页点名字回到顶部；子页面点名字回首页
+const root = rootOf(Astro.url);
+const home = root ? `${root}index.html` : '#top';
+---
+
+<div class="topbar">
+  <div class="container bar">
+    <a class="brand" href={home} aria-label={root ? '回到首页' : '回到顶部'}>
+      <span class="name">{site.name}</span>
+      <span class="alias">{site.alias}</span>
+    </a>
+
+    <div class="contact">
+      <button
+        class="contact-btn"
+        type="button"
+        aria-expanded="false"
+        aria-controls="contact-menu"
+      >
+        联系方式
+        <svg class="caret" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+          <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <div class="menu" id="contact-menu" hidden>
+        <span class="label">邮箱</span>
+        <a class="email" href={`mailto:${site.email}`}>{site.email}</a>
+        <button class="copy" type="button" data-email={site.email}>复制邮箱</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.contact-btn');
+  const menu = document.getElementById('contact-menu');
+  const copy = document.querySelector<HTMLButtonElement>('.menu .copy');
+
+  const setOpen = (open: boolean) => {
+    if (!btn || !menu) return;
+    menu.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+  };
+
+  btn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(menu?.hidden ?? false);
+  });
+
+  // 点下拉窗口外面或按 Esc 收起
+  document.addEventListener('click', (e) => {
+    if (menu && !menu.hidden && !menu.contains(e.target as Node)) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menu && !menu.hidden) {
+      setOpen(false);
+      btn?.focus();
+    }
+  });
+
+  copy?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(copy.dataset.email ?? '');
+      copy.textContent = '已复制 ✓';
+    } catch {
+      copy.textContent = '复制失败，请手动选择';
+    }
+    setTimeout(() => (copy.textContent = '复制邮箱'), 1600);
+  });
+</script>
+
+<style>
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 64px;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .brand:hover {
+    text-decoration: none;
+  }
+
+  .name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .alias {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .contact {
+    position: relative;
+  }
+
+  .contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .contact-btn:hover,
+  .contact-btn[aria-expanded='true'] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .contact-btn:focus-visible,
+  .copy:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .caret {
+    flex: none;
+    transition: transform 0.15s;
+  }
+
+  .contact-btn[aria-expanded='true'] .caret {
+    transform: rotate(180deg);
+  }
+
+  .menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+    animation: drop 0.15s ease-out;
+  }
+
+  .menu[hidden] {
+    display: none;
+  }
+
+  @keyframes drop {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  .label {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .email {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+  }
+
+  .copy {
+    align-self: flex-start;
+    margin-top: 4px;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
+
+  .copy:hover {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--surface);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu {
+      animation: none;
+    }
+  }
+</style>

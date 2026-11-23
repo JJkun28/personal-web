@@ -1,0 +1,47 @@
+---
+// 横排精灵图动画：按每帧时长逐帧播放。高度由外层的 --sprite-h 决定，宽度按比例算。
+import type { Sprite } from '../data/projects';
+
+interface Props {
+  sprite: Sprite;
+  name: string; // 动画名，页面内唯一即可
+  alt?: string;
+}
+
+const { sprite, name, alt = '' } = Astro.props;
+const total = sprite.durations.reduce((a, b) => a + b, 0);
+let elapsed = 0;
+const stops = sprite.durations.map((d, i) => {
+  const at = ((elapsed / total) * 100).toFixed(3);
+  elapsed += d;
+  const x = sprite.frames > 1 ? (i / (sprite.frames - 1)) * 100 : 0;
+  return `${at}% { background-position: ${x}% 0; }`;
+});
+stops.push('100% { background-position: 100% 0; }');
+const keyframes = `@keyframes ${name} { ${stops.join(' ')} }`;
+const style = [
+  `background-image: url('${sprite.src}')`,
+  `background-size: ${sprite.frames * 100}% 100%`,
+  `width: calc(var(--sprite-h, 110px) * ${sprite.width} / ${sprite.height})`,
+  `animation: ${name} ${total}ms step-end infinite`,
+].join('; ');
+---
+
+<style is:inline set:html={keyframes}></style>
+<span class="sprite" role={alt ? 'img' : undefined} aria-label={alt || undefined} style={style}></span>
+
+<style>
+  .sprite {
+    display: block;
+    height: var(--sprite-h, 110px);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    image-rendering: pixelated;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sprite {
+      animation: none !important;
+    }
+  }
+</style>
