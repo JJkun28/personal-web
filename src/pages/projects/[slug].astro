@@ -18,7 +18,7 @@ const root = rootOf(Astro.url);
 const { cover } = project;
 ---
 
-<Page title={`${project.title} · ${site.name} ${site.alias}`} description={project.summary} art={false}>
+<Page title={`${project.title} · ${site.name} ${site.alias}`} description={project.summary}>
   <main class="container detail">
     {/* 打开详情页第一眼看到的永远是封面；桌宠合集没有封面图，用三只桌宠代替 */}
     {

@@ -1,0 +1,208 @@
+---
+// 教育经历：一所学校一张 16:9 卡片（和照片同比例），宽屏两张并排。第一行中文（学校 · 专业学位 · 时间），第二行英文。
+// 有照片的卡片：鼠标移上去时照片作为卡片背景从下往上滚进来，移开后继续往上滚走。
+// 触屏设备没有「悬停」，不显示照片。数据在 src/data/education.ts。
+import { education } from '../data/education';
+---
+
+<section id="education">
+  <div class="container">
+    <h2 class="section-title">教育经历</h2>
+    <ul class="list">
+      {
+        education.map((item) => (
+          <li class:list={['card', { 'has-photo': item.image }]}>
+            {item.image && (
+              <span class="bg" data-state="below" aria-hidden="true">
+                <img
+                  src={item.image.src}
+                  alt=""
+                  decoding="async"
+                  fetchpriority="low"
+                  style={item.image.position ? `object-position: ${item.image.position}` : undefined}
+                />
+              </span>
+            )}
+            <span class="text">
+              <span class="cn">
+                <span class="school">{item.school}</span>
+                <span class="degree">{item.degree}</span>
+              </span>
+              <span class="en">
+                {item.schoolEn} · {item.degreeEn}
+              </span>
+            </span>
+            <span class="time">
+              {item.start} – {item.end}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<script>
+  // 进来：先把照片瞬间放到卡片下方，再滚到正中；离开：从正中继续往上滚走
+  for (const card of document.querySelectorAll<HTMLElement>('#education .has-photo')) {
+    const bg = card.querySelector<HTMLElement>('.bg');
+    if (!bg) continue;
+    card.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      bg.style.transition = 'none';
+      bg.dataset.state = 'below';
+      void bg.offsetHeight; // 让「放到下方」先生效，下一步才有滚动动画
+      bg.style.transition = '';
+      bg.dataset.state = 'in';
+      card.classList.add('lit');
+    });
+    card.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      bg.dataset.state = 'out';
+      card.classList.remove('lit');
+    });
+  }
+</script>
+
+<style>
+  .list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 640px) {
+    .list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* 卡片和照片一样是 16:9；文字放在左下角 */
+  .card {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    aspect-ratio: 16 / 9;
+    padding: 20px 22px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  /* 背景照片层：默认藏在卡片下方 */
+  .bg {
+    position: absolute;
+    inset: 0;
+    transform: translateY(101%);
+    transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .bg[data-state='in'] {
+    transform: translateY(0);
+  }
+
+  .bg[data-state='out'] {
+    transform: translateY(-101%);
+  }
+
+  .bg img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 底部压暗，保证左下角的白字看得清，上半部分照片保持原样 */
+  .bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.78) 0%, rgb(0 0 0 / 0.4) 38%, transparent 70%);
+  }
+
+  .text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    transition: color 0.3s ease;
+  }
+
+  .cn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+  }
+
+  .school {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .degree {
+    font-size: 1rem;
+  }
+
+  /* 时间放在卡片右上角，文字区保持「中文一行 + 英文一行」 */
+  .time {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: color 0.3s ease;
+  }
+
+  /* 英文行固定留两行高度：长的会折行，两张卡的中文行仍然对齐 */
+  .en {
+    min-height: 3.2em;
+    line-height: 1.6;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: color 0.3s ease;
+  }
+
+  /* 照片滚进来时文字变白 */
+  .card.lit .text {
+    color: #fff;
+  }
+  .card.lit .time,
+  .card.lit .en {
+    color: rgb(255 255 255 / 0.88);
+  }
+
+  /* 照片上方没有压暗，右上角的时间加一点阴影 */
+  .card.lit .time {
+    text-shadow: 0 1px 6px rgb(0 0 0 / 0.6);
+  }
+
+  @media (max-width: 639px) {
+    .card {
+      padding: 16px 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bg {
+      transform: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .bg[data-state='in'] {
+      transform: none;
+      opacity: 1;
+    }
+    .bg[data-state='out'] {
+      transform: none;
+      opacity: 0;
+    }
+  }
+</style>

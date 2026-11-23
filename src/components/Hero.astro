@@ -1,60 +1,71 @@
 ---
 import { site } from '../data/site';
+
+// 年龄 = 今年 - 出生年份。构建时先算一次，浏览器打开时再按当天的年份更新，
+// 所以就算网站一年没重新部署，年龄也不会过期。
+const age = new Date().getFullYear() - site.birthYear;
 ---
 
 <header class="hero" id="top">
   <div class="container">
-    <h1 class="visually-hidden">{site.name} {site.alias}</h1>
-    <nav class="links" aria-label="快速链接">
-      <a href="#projects">项目</a>
-      <a href="#skills">技能</a>
-      <a href={site.github} target="_blank" rel="noopener">GitHub ↗</a>
-    </nav>
+    <h1 class="name">
+      {site.name}
+      <span class="pinyin">/ {site.pinyin}</span>
+    </h1>
+    <p class="meta">
+      <span><span class="age" data-birth-year={site.birthYear}>{age}</span> 岁</span>
+      <span class="sep" aria-hidden="true">/</span>
+      <a href={site.github} target="_blank" rel="noopener" title="打开我的 GitHub">{site.alias}</a>
+    </p>
   </div>
 </header>
 
+<script>
+  const el = document.querySelector<HTMLElement>('.age[data-birth-year]');
+  if (el) el.textContent = String(new Date().getFullYear() - Number(el.dataset.birthYear));
+</script>
+
 <style>
   .hero {
-    padding: 32px 0 28px;
-    border-bottom: 1px solid var(--border);
+    padding: 48px 0 0;
   }
 
-  /* 标题只给读屏软件和搜索引擎看，名字已经显示在顶部栏 */
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
+  .name {
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  .pinyin {
+    margin-left: 0.3em;
+    font-family: var(--font-mono);
+    font-size: 0.55em;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--accent);
     white-space: nowrap;
   }
 
-  .links {
+  .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-left: -10px;
+    align-items: baseline;
+    gap: 0 10px;
+    margin: 10px 0 0;
     font-family: var(--font-mono);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    color: var(--muted);
   }
 
-  .links a {
-    padding: 4px 10px;
-    border-radius: 999px;
-    transition:
-      background-color 0.15s,
-      color 0.15s;
-  }
-
-  .links a:hover {
-    background: var(--accent-soft);
-    text-decoration: none;
+  .sep {
+    color: var(--border);
   }
 
   @media (max-width: 639px) {
     .hero {
-      padding: 24px 0 20px;
+      padding-top: 32px;
     }
   }
 </style>

@@ -39,11 +39,14 @@ const [first, second, ...rest] = projects;
     gap: 12px;
   }
 
-  .row > :global(:nth-child(1)) {
-    height: 150px;
-  }
-  .row > :global(:nth-child(2)) {
-    height: 170px;
+  /* 窄屏竖排时两块高度不同；只在窄屏生效，宽屏两块一起撑满最下面那一行 */
+  @media (max-width: 639px) {
+    .row > :global(:nth-child(1)) {
+      height: 150px;
+    }
+    .row > :global(:nth-child(2)) {
+      height: 170px;
+    }
   }
 
   @media (min-width: 640px) {
@@ -69,11 +72,9 @@ const [first, second, ...rest] = projects;
     }
 
     .row > :global(*) {
-      height: auto;
       flex: 3.4 1 0;
     }
     .row > :global(:nth-child(2)) {
-      height: auto;
       flex-grow: 1.6;
     }
 
