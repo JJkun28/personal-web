@@ -25,7 +25,9 @@ const titleOf = (slug: string) => projects.find((p) => p.slug === slug)?.title ?
     <ul class="grid">
       {
         skills.map((skill) => (
-          <li class="card">
+          <li class="card glow-card">
+            <span class="edge-light" aria-hidden="true" />
+            <div class="inner">
             <div class="head">
               <span class="icon" aria-hidden="true">
                 <svg
@@ -59,6 +61,7 @@ const titleOf = (slug: string) => projects.find((p) => p.slug === slug)?.title ?
                 ))}
               </p>
             )}
+            </div>
           </li>
         ))
       }
@@ -66,7 +69,196 @@ const titleOf = (slug: string) => projects.find((p) => p.slug === slug)?.title ?
   </div>
 </section>
 
+<script>
+  // 边缘光：鼠标靠近卡片边缘时，按指针方向点亮边框和外发光（移植自 React Bits 的 BorderGlow）
+  // 只在有鼠标悬停能力的设备上启用，触屏上不出效果
+  if (window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll<HTMLElement>('.glow-card').forEach((card) => {
+      card.addEventListener('pointermove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const dx = e.clientX - rect.left - cx;
+        const dy = e.clientY - rect.top - cy;
+
+        // 离边缘多近：中心为 0，边缘为 100
+        const kx = dx === 0 ? Infinity : cx / Math.abs(dx);
+        const ky = dy === 0 ? Infinity : cy / Math.abs(dy);
+        const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+
+        // 指针相对中心的角度：0deg 朝上，顺时针
+        let angle = 0;
+        if (dx !== 0 || dy !== 0) {
+          angle = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
+          if (angle < 0) angle += 360;
+        }
+
+        card.style.setProperty('--edge-proximity', (edge * 100).toFixed(3));
+        card.style.setProperty('--cursor-angle', `${angle.toFixed(3)}deg`);
+      });
+    });
+  }
+</script>
+
 <style>
+  /* ---------- 边缘光（BorderGlow） ---------- */
+  .glow-card {
+    --edge-proximity: 0;
+    --cursor-angle: 45deg;
+    --edge-sensitivity: 30;
+    --color-sensitivity: calc(var(--edge-sensitivity) + 20);
+    --glow-padding: 40px;
+    --cone-spread: 25;
+    --fill-opacity: 0.5;
+
+    /* 浅色模式：主题蓝为主，配紫、青 */
+    --glow-c1: #2f6fde;
+    --glow-c2: #7c5cf0;
+    --glow-c3: #0ea5e9;
+    --glow-hsl: 218deg 72% 53%;
+    /* 外圈光晕强度倍数：黑底上同样透明度的光显得更弱，深色模式要调高 */
+    --halo: 1;
+    --glow-blend: normal;
+    --fill-blend: normal;
+
+    position: relative;
+    isolation: isolate;
+    transform: translate3d(0, 0, 0.01px);
+    overflow: visible;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .glow-card {
+      --glow-c1: #7aa7ff;
+      --glow-c2: #b69cff;
+      --glow-c3: #5ad1ff;
+      --glow-hsl: 220deg 100% 74%;
+      /* 黑底上"变暗的阴影"看不出来，只能靠更亮的蓝色光晕来对应浅色里的那圈晕影 */
+      --halo: 3.2;
+      /* 内部染色：soft-light 在纯黑上等于没有，改用正常混合，透明度调低以免太艳 */
+      --fill-opacity: 0.32;
+      --glow-blend: normal;
+      --fill-blend: normal;
+    }
+  }
+
+  .glow-card::before,
+  .glow-card::after,
+  .glow-card > .edge-light {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    transition: opacity 0.25s ease-out;
+    z-index: -1;
+  }
+
+  .glow-card:not(:hover)::before,
+  .glow-card:not(:hover)::after,
+  .glow-card:not(:hover) > .edge-light {
+    opacity: 0;
+    transition: opacity 0.75s ease-in-out;
+  }
+
+  /* 彩色渐变描边：只在指针方向的一段锥形范围内显示 */
+  .glow-card::before {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--surface) 0 100%) padding-box,
+      radial-gradient(at 80% 55%, var(--glow-c1) 0px, transparent 50%) border-box,
+      radial-gradient(at 69% 34%, var(--glow-c2) 0px, transparent 50%) border-box,
+      radial-gradient(at 8% 6%, var(--glow-c3) 0px, transparent 50%) border-box,
+      radial-gradient(at 41% 38%, var(--glow-c1) 0px, transparent 50%) border-box,
+      radial-gradient(at 86% 85%, var(--glow-c2) 0px, transparent 50%) border-box,
+      radial-gradient(at 82% 18%, var(--glow-c3) 0px, transparent 50%) border-box,
+      radial-gradient(at 51% 4%, var(--glow-c2) 0px, transparent 50%) border-box,
+      linear-gradient(var(--glow-c1) 0 100%) border-box;
+    opacity: calc(
+      (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity))
+    );
+    mask-image: conic-gradient(
+      from var(--cursor-angle) at center,
+      black calc(var(--cone-spread) * 1%),
+      transparent calc((var(--cone-spread) + 15) * 1%),
+      transparent calc((100 - var(--cone-spread) - 15) * 1%),
+      black calc((100 - var(--cone-spread)) * 1%)
+    );
+  }
+
+  /* 靠近边缘时卡片内部的淡淡彩色填充 */
+  .glow-card::after {
+    border: 1px solid transparent;
+    background:
+      radial-gradient(at 80% 55%, var(--glow-c1) 0px, transparent 50%) padding-box,
+      radial-gradient(at 69% 34%, var(--glow-c2) 0px, transparent 50%) padding-box,
+      radial-gradient(at 8% 6%, var(--glow-c3) 0px, transparent 50%) padding-box,
+      radial-gradient(at 41% 38%, var(--glow-c1) 0px, transparent 50%) padding-box,
+      radial-gradient(at 86% 85%, var(--glow-c2) 0px, transparent 50%) padding-box,
+      radial-gradient(at 82% 18%, var(--glow-c3) 0px, transparent 50%) padding-box,
+      radial-gradient(at 51% 4%, var(--glow-c2) 0px, transparent 50%) padding-box,
+      linear-gradient(var(--glow-c1) 0 100%) padding-box;
+    mask-image:
+      linear-gradient(to bottom, black, black),
+      radial-gradient(ellipse at 50% 50%, black 40%, transparent 65%),
+      radial-gradient(ellipse at 66% 66%, black 5%, transparent 40%),
+      radial-gradient(ellipse at 33% 33%, black 5%, transparent 40%),
+      radial-gradient(ellipse at 66% 33%, black 5%, transparent 40%),
+      radial-gradient(ellipse at 33% 66%, black 5%, transparent 40%),
+      conic-gradient(
+        from var(--cursor-angle) at center,
+        transparent 5%,
+        black 15%,
+        black 85%,
+        transparent 95%
+      );
+    mask-composite: subtract, add, add, add, add, add;
+    opacity: calc(
+      var(--fill-opacity) * (var(--edge-proximity) - var(--color-sensitivity)) /
+        (100 - var(--color-sensitivity))
+    );
+    mix-blend-mode: var(--fill-blend);
+  }
+
+  /* 卡片外围的发光 */
+  .glow-card > .edge-light {
+    inset: calc(var(--glow-padding) * -1);
+    pointer-events: none;
+    z-index: 1;
+    mask-image: conic-gradient(
+      from var(--cursor-angle) at center,
+      black 2.5%,
+      transparent 10%,
+      transparent 90%,
+      black 97.5%
+    );
+    opacity: calc(
+      (var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity))
+    );
+    mix-blend-mode: var(--glow-blend);
+  }
+
+  .glow-card > .edge-light::before {
+    content: '';
+    position: absolute;
+    inset: var(--glow-padding);
+    border-radius: var(--radius);
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--glow-hsl) / 100%),
+      inset 0 0 1px 0 hsl(var(--glow-hsl) / 60%),
+      inset 0 0 3px 0 hsl(var(--glow-hsl) / 50%),
+      inset 0 0 6px 0 hsl(var(--glow-hsl) / 40%),
+      inset 0 0 15px 0 hsl(var(--glow-hsl) / 30%),
+      inset 0 0 25px 2px hsl(var(--glow-hsl) / 20%),
+      inset 0 0 50px 2px hsl(var(--glow-hsl) / 10%),
+      0 0 1px 0 hsl(var(--glow-hsl) / calc(0.6 * var(--halo))),
+      0 0 3px 0 hsl(var(--glow-hsl) / calc(0.5 * var(--halo))),
+      0 0 6px 0 hsl(var(--glow-hsl) / calc(0.4 * var(--halo))),
+      0 0 15px 0 hsl(var(--glow-hsl) / calc(0.3 * var(--halo))),
+      0 0 25px 2px hsl(var(--glow-hsl) / calc(0.2 * var(--halo))),
+      0 0 50px 2px hsl(var(--glow-hsl) / calc(0.1 * var(--halo)));
+  }
+
+  /* ---------- 卡片布局 ---------- */
   .grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -83,18 +275,19 @@ const titleOf = (slug: string) => projects.find((p) => p.slug === slug)?.title ?
   }
 
   .card {
+    display: grid;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .inner {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 18px 18px 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    transition: border-color 0.15s;
-  }
-
-  .card:hover {
-    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   }
 
   .head {
