@@ -3,13 +3,16 @@
 //   第 3 个被挤小时改显示它的 squeezeCover）。
 // 每个项目会生成一个详情页 projects/<slug>.html，slug 只用小写字母、数字和连字符。
 // cover 是封面：首页拼图上的背景图，也是详情页最上面的第一张图；
-// gallery 是详情页正文后面的配图；details 是详情页的长介绍，一段一个字符串。
+// showcase 是成品效果图，放在标题下、正文前；gallery 是正文后面的配图；details 是详情页的长介绍，一段一个字符串。
 // 图片放到 public/images/，src 写 images/文件名（不要以 / 开头，本地双击打开时才能显示）。
 
+// 写了 title 时图下说明靠左、带小标题；half: true 的图两张并排（适合竖版的页面截图）
 export interface ProjectImage {
   src: string;
   alt: string;
+  title?: string;
   caption?: string;
+  half?: boolean;
   pixel?: boolean;
   width?: number;
   height?: number;
@@ -53,6 +56,10 @@ export interface Project {
   cover?: Cover;
   // 最下面一行左边那块被右边挤小时显示的动画（逐帧精灵图）
   squeezeCover?: Sprite & { alt: string };
+  // 两组配图各自上方的小标题，比如「最终效果」「建谱向导页面」
+  showcaseTitle?: string;
+  showcase?: ProjectImage[];
+  galleryTitle?: string;
   gallery?: ProjectImage[];
   // 桌宠合集专用：拼图上并排显示这几只，详情页逐只列出
   pets?: Pet[];
@@ -118,13 +125,55 @@ export const projects: Project[] = [
       width: 1600,
       height: 900,
     },
+    showcaseTitle: '最终效果',
+    showcase: [
+      {
+        src: 'images/projects/root-trace-graph.webp',
+        width: 1209,
+        height: 396,
+        alt: '三代人的家族关系图：族长和配偶连到长子，长子和配偶再连到两个子女，每人旁边写着称谓',
+        title: '家族关系图',
+        caption:
+          '录入的人自动连成一张关系网：夫妻连到同一个节点，再分出子女，每个人旁边显示照片和称谓。之后还可以在图上点「+」补人、改资料。',
+      },
+      {
+        src: 'images/projects/root-trace-pdf-cover.webp',
+        width: 1075,
+        height: 1521,
+        alt: 'PDF 族谱封面：锅氏族谱，下面写着祖训',
+        title: 'PDF 族谱 · 封面',
+        caption: '封面印上姓氏、始祖和祖训。',
+        half: true,
+      },
+      {
+        src: 'images/projects/root-trace-pdf-person.webp',
+        width: 1075,
+        height: 1521,
+        alt: 'PDF 族谱第 1 世成员页：照片、姓名、称谓、生日、农历生日、生肖和生平',
+        title: 'PDF 族谱 · 成员页',
+        caption: '每位成员单独一页，按世代排列：照片、称谓、生辰、生肖、生平。',
+        half: true,
+      },
+    ],
+    galleryTitle: '建谱向导页面',
     gallery: [
       {
-        src: 'images/projects/root-trace-readme.gif',
-        width: 1100,
-        height: 700,
-        alt: 'Root Trace 族谱编辑界面动图',
-        caption: 'Root Trace 原项目的族谱编辑界面（动图来自原仓库）',
+        src: 'images/projects/root-trace-wizard-start.webp',
+        width: 1152,
+        height: 624,
+        alt: '建族谱向导的欢迎页，说明会从「你」开始一代一代地问',
+        title: '欢迎页',
+        caption:
+          '向导从「你」开始一代一代地问：往上问父母、祖辈，往下问配偶、子女、孙辈，兄弟姐妹一家也会问到。知道多少填多少，任何一页都能跳过。',
+      },
+      {
+        src: 'images/projects/root-trace-wizard-me.webp',
+        width: 1148,
+        height: 826,
+        alt: '向导第一步：填写「我」的姓名、性别和照片',
+        title: '逐人填写',
+        caption:
+          '每个人一张卡片，只有姓名必填，照片可以直接上传。称谓按关系自动推算（外曾祖母、儿媳、侄子……），草稿随时自动保存。',
       },
     ],
     href: 'https://github.com/huhuper/Root-Trace',
@@ -159,6 +208,17 @@ export const projects: Project[] = [
       height: 141,
       durations: [450, 300, 110, 350, 110, 450],
     },
+    gallery: [
+      {
+        src: 'images/projects/claude-pet-menu.webp',
+        width: 640,
+        height: 825,
+        alt: '右键桌宠弹出的菜单：当前状态、和 Claude 说话、动作预览、大小、换宠物、hooks 设置等',
+        title: '右键菜单',
+        caption:
+          '右键桌宠就能打开。最上面显示当前状态和进行中的会话数，「和 Claude 说话」可以直接给桌面版的会话发消息。中间几组能挨个播放每段动画，调大小、换宠物、设置置顶和开机自启。下面一组管 hooks：一键接入 Claude Code、查看事件日志、换完 GIF 后重新加载。选「隐藏」后，下次在 Claude Code 里发消息它会自己出来。',
+      },
+    ],
     href: 'https://github.com/JJkun28/claude-pet',
     linkLabel: 'GitHub',
     note: '女仆动画素材来自 dsh-pet（github.com/PC2005-cloud/dsh-pet）',

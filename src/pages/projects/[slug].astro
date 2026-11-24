@@ -4,6 +4,7 @@ import Page from '../../layouts/Page.astro';
 import { projects, type Project } from '../../data/projects';
 import { site } from '../../data/site';
 import { rootOf } from '../../lib/paths';
+import Gallery from '../../components/Gallery.astro';
 
 export function getStaticPaths() {
   return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
@@ -63,27 +64,14 @@ const { cover } = project;
       </ul>
     </header>
 
+    {/* 成品效果放在正文前面，先让人看到项目最后做出来是什么样 */}
+    {project.showcase && <Gallery title={project.showcaseTitle} items={project.showcase} root={root} />}
+
     <div class="text">
       {project.details.map((p) => <p>{p}</p>)}
     </div>
 
-    {
-      project.gallery?.map((img) => (
-        <figure>
-          <div class="frame">
-            <img
-              src={`${root}${img.src}`}
-              alt={img.alt}
-              width={img.width}
-              height={img.height}
-              class:list={{ pixel: img.pixel }}
-              decoding="async"
-            />
-          </div>
-          {img.caption && <figcaption>{img.caption}</figcaption>}
-        </figure>
-      ))
-    }
+    {project.gallery && <Gallery title={project.galleryTitle} items={project.gallery} root={root} />}
 
     {
       (project.href || project.note) && (
@@ -189,36 +177,9 @@ const { cover } = project;
     color: var(--accent);
   }
 
-  figure {
-    margin: 0 0 24px;
-  }
-
-  .frame {
-    display: grid;
-    place-items: center;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface-2);
-  }
-
-  .frame img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-  }
-
   .pixel,
   .pets img {
     image-rendering: pixelated;
-  }
-
-  figcaption {
-    margin-top: 6px;
-    font-size: 0.8rem;
-    color: var(--muted);
-    text-align: center;
   }
 
   .pets {

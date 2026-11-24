@@ -1,0 +1,118 @@
+---
+// 详情页里的一组配图：可选小标题；half: true 的图两张并排，其余占满一行
+import type { ProjectImage } from '../data/projects';
+
+interface Props {
+  title?: string;
+  items: ProjectImage[];
+  root: string;
+}
+
+const { title, items, root } = Astro.props;
+---
+
+<section class="gallery">
+  {title && <h2>{title}</h2>}
+  <div class="grid">
+    {
+      items.map((img) => (
+        <figure class:list={{ half: img.half }}>
+          <div class="frame">
+            <img
+              src={`${root}${img.src}`}
+              alt={img.alt}
+              width={img.width}
+              height={img.height}
+              class:list={{ pixel: img.pixel }}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          {img.title ? (
+            <figcaption class="explain">
+              <strong>{img.title}</strong>
+              {img.caption && <span>{img.caption}</span>}
+            </figcaption>
+          ) : (
+            img.caption && <figcaption>{img.caption}</figcaption>
+          )}
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .gallery {
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    margin: 0 0 14px;
+    font-size: 1.25rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+  }
+
+  figure {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 24px;
+  }
+
+  figure.half {
+    grid-column: auto;
+  }
+
+  .frame {
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+  }
+
+  .frame img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+
+  .pixel {
+    image-rendering: pixelated;
+  }
+
+  figcaption {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* 带小标题的说明：靠左、正文字号 */
+  .explain {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: var(--text);
+    text-align: left;
+  }
+
+  .explain strong {
+    font-weight: 600;
+  }
+
+  .explain span {
+    color: var(--muted);
+    line-height: 1.7;
+  }
+</style>
